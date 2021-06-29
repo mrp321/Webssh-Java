@@ -32,6 +32,7 @@
 </div>
 <div id="dragDiv"></div>
 <script src="../js/jquery-3.4.1.min.js"></script>
+<script src="../js/global.js"></script>
 <!--<script src="../js/xterm.js" charset="utf-8"></script>-->
 <script src="../js/webssh.js" charset="utf-8"></script>
 <script src="../xterm/lib/xterm.js"></script>
@@ -39,12 +40,16 @@
     var client;
     var term;
 
+    var host = global.getQueryString("host");
+    var port = global.getQueryString("port");
+    var username = global.getQueryString("username");
+    var password = global.getQueryString("password");
     openTerminal({
         operate: 'connect',
-        host: '192.168.23.208',//IP
-        port: '22',//端口号
-        username: 'root',//用户名
-        password: 'password'//密码
+        host: host,//IP
+        port: port,//端口号
+        username: username,//用户名
+        password: password//密码
     });
 
     //terminal 大小改变
@@ -61,7 +66,7 @@
     };
 
     //限制最小宽度，避免排版错乱
-    var minWidth = $(window).width()*0.3;
+    var minWidth = $(window).width() * 0.3;
     //调整大小
     var resizeDiv = {
         init: function () {
@@ -154,15 +159,16 @@
                 //收到数据时回调
                 term.write(data);
             },
-            onReconnect: function(times) {
+            onReconnect: function (times) {
                 //重连回调
-                term.writeln(ordinal_suffix_of(times)+" reconnecting....");
+                term.writeln(ordinal_suffix_of(times) + " reconnecting....");
                 term.writeln("");
             },
-            onOverReconnect: function(times) {
-                alert("Reconnection failed more than "+times+" times.");
+            onOverReconnect: function (times) {
+                alert("Reconnection failed more than " + times + " times.");
             }
         });
+
         function ordinal_suffix_of(i) {
             var j = i % 10,
                 k = i % 100;

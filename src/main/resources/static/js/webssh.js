@@ -8,9 +8,8 @@ WSSHClient.prototype._generateEndpoint = function () {
         var protocol = 'ws://';
     }
     // 内嵌应用可直接获取host
-    // var host = window.location.host;
-    // var endpoint = protocol+host+'/race/webssh';
-    var endpoint = protocol+'127.0.0.1:8080/webssh';
+    var host = window.location.host;
+    var endpoint = protocol + host + '/race/webssh';
     return endpoint;
 };
 
@@ -20,7 +19,7 @@ WSSHClient.prototype.connect = function (options) {
     if (window.WebSocket) {
         //如果支持websocket
         this._connection = new WebSocket(endpoint);
-    }else {
+    } else {
         //否则报错
         options.onError('WebSocket Not Supported');
         return;
@@ -97,6 +96,7 @@ var lockReconnect = false;//重连锁，避免重复连接
 var reconnectTimes = 0;
 var maxReconnectTimes = 6;
 var resetReconnectTimeout;
+
 function reconnect(options) {
     if (lockReconnect)
         return;
@@ -112,13 +112,13 @@ function reconnect(options) {
 
     options.onReconnect(++reconnectTimes);
 
-    setTimeout(function() {
+    setTimeout(function () {
         client.connect(options);
         lockReconnect = false;
     }, 500);
 
     //3分钟没重连，设为0次
-    resetReconnectTimeout = setTimeout(function() {
-        reconnectTimes=0;
-    }, 3*60*1000);
+    resetReconnectTimeout = setTimeout(function () {
+        reconnectTimes = 0;
+    }, 3 * 60 * 1000);
 }

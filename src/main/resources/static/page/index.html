@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>SSH Login</title>
+    <script src="./../js/jquery-3.4.1.min.js"></script>
+</head>
+<body>
+<div id="main" align="center">
+    <form id="form" name="form" action="/loginSSH">
+        <fieldset>
+            <label for="host">Host</label>
+            <input id="host" name="host" type="text" placeholder="Host"><br>
+            <label for="port">Port</label>
+            <input id="port" name="port" type="text" placeholder="Port"><br>
+            <label for="username">Username</label>
+            <input id="username" name="username" type="text" placeholder="Username"><br>
+            <label for="password">Password</label>
+            <input id="password" name="password" type="password"
+                   placeholder="Password"><br>
+            <button type="submit" class="">Connect</button>
+        </fieldset>
+    </form>
+</div>
+</body>
+</html>
