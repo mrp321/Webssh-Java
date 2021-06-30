@@ -1,5 +1,7 @@
 package cn.objectspace.webssh.controller;
 
+import cn.objectspace.webssh.util.SecurityUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 
@@ -9,8 +11,10 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Controller
+@Slf4j
 public class RouterController {
-    private static final String RAW_WEB_SSH_PAGE_PARAM_URL = "?host=%s&port=%s&username=%s&password=%s";
+    private static final String RAW_WEB_SSH_PAGE_PARAM_URL = "host=%s&port=%s&username=%s&password=%s";
+    private static final String RAW_WEB_SSH_PAGE_PARAM_URL_ENC = "?params=%s";
 
     @RequestMapping("/")
     public String indexpage() {
@@ -20,12 +24,10 @@ public class RouterController {
     @RequestMapping("/loginSSH")
     public String websshpage(HttpServletRequest request) {
         Map<String, String> reqParams = this.getRequestParams(request);
-//        // 添加重定向地址参数
-//        RedirectAttributes redirectAttributes = new RedirectAttributesModelMap();
-//        redirectAttributes.addAllAttributes(reqParams);
-
+        log.info("登录至SSH, 请求参数为: {}", reqParams);
         String paramUrl = String.format(RAW_WEB_SSH_PAGE_PARAM_URL, reqParams.get("host"), reqParams.get("port"), reqParams.get("username"), reqParams.get("password"));
-        return "redirect:websshpage" + paramUrl;
+        String paramUrlEnc = String.format(RAW_WEB_SSH_PAGE_PARAM_URL_ENC, SecurityUtil.rsaEnc(paramUrl));
+        return "redirect:websshpage" + paramUrlEnc;
     }
 
     @RequestMapping("/websshpage")

@@ -40,16 +40,19 @@
     var client;
     var term;
 
-    var host = global.getQueryString("host");
-    var port = global.getQueryString("port");
-    var username = global.getQueryString("username");
-    var password = global.getQueryString("password");
+    // var host = global.getQueryString("host");
+    // var port = global.getQueryString("port");
+    // var username = global.getQueryString("username");
+    // var password = global.getQueryString("password");
+    // ssh连接参数加密串
+    var params = global.getQueryString("params");
     openTerminal({
         operate: 'connect',
-        host: host,//IP
-        port: port,//端口号
-        username: username,//用户名
-        password: password//密码
+        // host: host,//IP
+        // port: port,//端口号
+        // username: username,//用户名
+        // password: password//密码
+        sshConnParam: params
     });
 
     //terminal 大小改变

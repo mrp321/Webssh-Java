@@ -1,9 +1,12 @@
 package cn.objectspace.webssh.service.impl;
 
+import cn.hutool.core.util.CharsetUtil;
+import cn.hutool.http.HttpUtil;
 import cn.objectspace.webssh.constant.ConstantPool;
 import cn.objectspace.webssh.pojo.SSHConnectInfo;
 import cn.objectspace.webssh.pojo.WebSSHData;
 import cn.objectspace.webssh.service.WebSSHService;
+import cn.objectspace.webssh.util.SecurityUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.jcraft.jsch.*;
 import org.slf4j.Logger;
@@ -23,10 +26,10 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 /**
-* @Description: WebSSH业务逻辑实现
-* @Author: NoCortY
-* @Date: 2020/3/8
-*/
+ * @Description: WebSSH业务逻辑实现
+ * @Author: NoCortY
+ * @Date: 2020/3/8
+ */
 @Service
 public class WebSSHServiceImpl implements WebSSHService {
     //存放ssh连接信息的map
@@ -47,7 +50,7 @@ public class WebSSHServiceImpl implements WebSSHService {
     public void initConnection(WebSocketSession session) {
         JSch jSch = new JSch();
         SSHConnectInfo sshConnectInfo = new SSHConnectInfo();
-        sshConnectInfo.setjSch(jSch);
+        sshConnectInfo.setJSch(jSch);
         sshConnectInfo.setWebSocketSession(session);
         String uuid = String.valueOf(session.getAttributes().get(ConstantPool.USER_UUID_KEY));
         //将这个ssh连接信息放入map中
@@ -91,7 +94,7 @@ public class WebSSHServiceImpl implements WebSSHService {
                         logger.error("异常信息:{}", e.getMessage());
                         try {
                             //发送错误信息
-                            sendMessage(session, ("ERROR : "+e.getMessage()).getBytes());
+                            sendMessage(session, ("ERROR : " + e.getMessage()).getBytes());
                         } catch (IOException ex) {
                             logger.error("消息发送失败");
                             logger.error("异常信息:{}", ex.getMessage());
@@ -107,7 +110,7 @@ public class WebSSHServiceImpl implements WebSSHService {
                 try {
                     ChannelShell channel = (ChannelShell) sshConnectInfo.getChannel();
                     if (channel != null) {
-                        channel.setPtySize(webSSHData.getCols(),webSSHData.getRows(),webSSHData.getWidth(),webSSHData.getHeight());
+                        channel.setPtySize(webSSHData.getCols(), webSSHData.getRows(), webSSHData.getWidth(), webSSHData.getHeight());
                         transToSSH(channel, command);
                         if (channel.isClosed()) {
                             close(session);
@@ -118,7 +121,7 @@ public class WebSSHServiceImpl implements WebSSHService {
                     logger.error("异常信息:{}", e.getMessage());
                     try {
                         //发送错误信息
-                        sendMessage(session, ("ERROR : "+e.getMessage()).getBytes());
+                        sendMessage(session, ("ERROR : " + e.getMessage()).getBytes());
                     } catch (IOException ex) {
                         logger.error("消息发送失败");
                         logger.error("异常信息:{}", ex.getMessage());
@@ -132,8 +135,9 @@ public class WebSSHServiceImpl implements WebSSHService {
             if (sshConnectInfo != null) {
                 try {
                     //处于连接状态则发送健康数据，不能为空，空则断开连接。
-                    if (sshConnectInfo.getChannel().isConnected())
+                    if (sshConnectInfo.getChannel().isConnected()) {
                         sendMessage(session, "Heartbeat healthy".getBytes());
+                    }
                 } catch (IOException e) {
                     logger.error("消息发送失败");
                     logger.error("异常信息:{}", e.getMessage());
@@ -156,7 +160,9 @@ public class WebSSHServiceImpl implements WebSSHService {
         SSHConnectInfo sshConnectInfo = (SSHConnectInfo) sshMap.get(userId);
         if (sshConnectInfo != null) {
             //断开连接
-            if (sshConnectInfo.getChannel() != null) sshConnectInfo.getChannel().disconnect();
+            if (sshConnectInfo.getChannel() != null) {
+                sshConnectInfo.getChannel().disconnect();
+            }
             //map中移除
             sshMap.remove(userId);
         }
@@ -178,18 +184,24 @@ public class WebSSHServiceImpl implements WebSSHService {
         Session session = null;
         Properties config = new Properties();
         config.put("StrictHostKeyChecking", "no");
+        // 获取ssh连接参数加密串
+        String sshConnParamEnc = webSSHData.getSshConnParam();
+        // 获取ssh连接参数解密串
+        String sshConnParamDec = SecurityUtil.rsaDec(sshConnParamEnc);
+        // ssh连接参数解密串转参数Map
+        Map<String, String> sshConnParamMap = HttpUtil.decodeParamMap(sshConnParamDec, CharsetUtil.CHARSET_UTF_8);
         //获取jsch的会话
-        session = sshConnectInfo.getjSch().getSession(webSSHData.getUsername(), webSSHData.getHost(), webSSHData.getPort());
+        session = sshConnectInfo.getJSch().getSession(sshConnParamMap.get("username"), sshConnParamMap.get("host"), Integer.parseInt(sshConnParamMap.get("port")));
         session.setConfig(config);
         //设置密码
-        session.setPassword(webSSHData.getPassword());
+        session.setPassword(sshConnParamMap.get("password"));
         //连接  超时时间30s
         session.connect(30000);
 
         //开启shell通道
         Channel channels = session.openChannel("shell");
         ChannelShell channel = (ChannelShell) channels;
-        channel.setPtySize(webSSHData.getCols(),webSSHData.getRows(),webSSHData.getWidth(),webSSHData.getHeight());
+        channel.setPtySize(webSSHData.getCols(), webSSHData.getRows(), webSSHData.getWidth(), webSSHData.getHeight());
 
         //通道连接 超时时间3s
         channel.connect(3000);

@@ -4,23 +4,66 @@
     <meta charset="UTF-8">
     <title>SSH Login</title>
     <script src="./../js/jquery-3.4.1.min.js"></script>
+    <script src="./../js/global.js"></script>
+    <script src="./../js/jsencrypt.min.js"></script>
+    <script type="text/javascript">
+        function submit() {
+            return true;
+            // var host = $("#host").val();
+            // if (host == null || host === '') {
+            //     return false;
+            // }
+            // var port = $("#port").val();
+            // if (port == null || port === '') {
+            //     return false;
+            // }
+            // var username = $("#username").val();
+            // if (username == null || username === '') {
+            //     return false;
+            // }
+            // var password = $("#password").val();
+            // if (password == null || password === '') {
+            //     return false;
+            // }
+            // console.log("password: " + password);
+            // var passwordEnc = rsaEnc(password);
+            // if (passwordEnc == null || passwordEnc === '') {
+            //     alert("password 加密异常")
+            //     return false;
+            // }
+            // console.log("passwordEnc: " + passwordEnc);
+            // $("#password_rsa").attr("value", passwordEnc);
+            // return true;
+        }
+
+        function rsaEnc(data) {
+            var encrypt = new JSEncrypt();
+            encrypt.setPublicKey('-----BEGIN PUBLIC KEY-----' + global.rsaPublicKey + '-----END PUBLIC KEY-----');
+            return encrypt.encrypt(data);
+        }
+    </script>
 </head>
 <body>
 <div id="main" align="center">
-    <form id="form" name="form" action="/loginSSH">
+    <!-- 表单绑定提交事件, onsubmit= 绑定一个提交检测的函数，true，false,将这个结果返回给表单，使用onsubmit接受-->
+    <!--onsubmint绑定表单，获取信息，当表单提交时候拦截加密-->
+    <form id="form" name="form" action="/loginSSH" method="post" onsubmit="return submit()">
         <fieldset>
             <label for="host">Host</label>
-            <input id="host" name="host" type="text" placeholder="Host"><br>
+            <input id="host" name="host" type="text" placeholder="Host" required="required" value="127.0.0.1"><br>
             <label for="port">Port</label>
-            <input id="port" name="port" type="text" placeholder="Port"><br>
+            <input id="port" name="port" type="text" placeholder="Port" required="required" value="22"><br>
             <label for="username">Username</label>
-            <input id="username" name="username" type="text" placeholder="Username"><br>
+            <input id="username" name="username" type="text" placeholder="Username" required="required"
+                   value="root"><br>
             <label for="password">Password</label>
-            <input id="password" name="password" type="password"
-                   placeholder="Password"><br>
-            <button type="submit" class="">Connect</button>
+            <input id="password" type="password"
+                   placeholder="Password" required="required" value="root" name="password"><br>
+            <!--<input type="hidden" id="password_rsa" name="password"><br>-->
+            <input type="submit" class="" value="Connect">
         </fieldset>
     </form>
 </div>
+
 </body>
 </html>
