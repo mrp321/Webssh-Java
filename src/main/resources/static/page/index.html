@@ -1,68 +1,119 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>SSH Login</title>
-    <script src="./../js/jquery-3.4.1.min.js"></script>
-    <script src="./../js/global.js"></script>
-    <script src="./../js/jsencrypt.min.js"></script>
-    <script type="text/javascript">
-        function submit() {
-            return true;
-            // var host = $("#host").val();
-            // if (host == null || host === '') {
-            //     return false;
-            // }
-            // var port = $("#port").val();
-            // if (port == null || port === '') {
-            //     return false;
-            // }
-            // var username = $("#username").val();
-            // if (username == null || username === '') {
-            //     return false;
-            // }
-            // var password = $("#password").val();
-            // if (password == null || password === '') {
-            //     return false;
-            // }
-            // console.log("password: " + password);
-            // var passwordEnc = rsaEnc(password);
-            // if (passwordEnc == null || passwordEnc === '') {
-            //     alert("password 加密异常")
-            //     return false;
-            // }
-            // console.log("passwordEnc: " + passwordEnc);
-            // $("#password_rsa").attr("value", passwordEnc);
-            // return true;
+<link>
+<meta charset="UTF-8">
+<title>SSH Login</title>
+<link rel="stylesheet" href="./../bootstrap5.0.2/css/bootstrap.min.css"/>
+<style>
+    #main {
+        padding: 1.5rem;
+        margin-right: 0;
+        margin-left: 0;
+        border-top-left-radius: .25rem;
+        border-top-right-radius: .25rem;
+        position: relative;
+        border: 1px solid #dee2e6;
+        width: 372px;
+        height: 448px;
+    }
+</style>
+<script src="./../bootstrap5.0.2/js/bootstrap.min.js"></script>
+<script src="./../js/jquery-3.4.1.min.js"></script>
+<script src="./../js/global.js"></script>
+<script src="./../js/jsencrypt.min.js"></script>
+<script type="text/javascript">
+    /**
+     * 提交SSH登录参数
+     */
+    function submit() {
+        var host = $("#host").val();
+        if (host == null || host === '') {
+            alert("host 不能为空");
+            return;
         }
+        var port = $("#port").val();
+        if (port == null || port === '') {
+            alert("port 不能为空");
+            return;
+        }
+        var username = $("#username").val();
+        if (username == null || username === '') {
+            alert("username 不能为空");
+            return;
+        }
+        var password = $("#password").val();
+        if (password == null || password === '') {
+            alert("password 不能为空");
+            return;
+        }
+        var passwordEnc = rsaEnc(password);
+        if (passwordEnc == null || passwordEnc === '') {
+            alert("password 加密异常");
+            return;
+        }
+        $.ajax({
+            url: "/sshapp/loginSSH",
+            data: {
+                host: host,
+                port: port,
+                username: username,
+                password: passwordEnc
+            },
+            type: 'post',
+            dataType: 'json',
+            async: true,
+            success: function (result) {
+                console.log("接口返回结果: " + JSON.stringify(result));
+                var code = result.code;
+                if (code === 0) {
+                    location.href = '/sshapp/websshpage?params=' + result.data;
+                } else {
+                    alert("发生异常: " + result.msg);
+                }
+            },
+            error: function (err) {
+                alert("发生异常: " + err);
+            }
+        });
+    }
 
-        function rsaEnc(data) {
-            var encrypt = new JSEncrypt();
-            encrypt.setPublicKey('-----BEGIN PUBLIC KEY-----' + global.rsaPublicKey + '-----END PUBLIC KEY-----');
-            return encrypt.encrypt(data);
-        }
-    </script>
+    /**
+     * 登录密码RSA方式加密
+     * @param data
+     * @returns {*}
+     */
+    function rsaEnc(data) {
+        var encrypt = new JSEncrypt();
+        encrypt.setPublicKey('-----BEGIN PUBLIC KEY-----' + global.rsaPublicKey + '-----END PUBLIC KEY-----');
+        return encrypt.encrypt(data);
+    }
+</script>
 </head>
 <body>
-<div id="main" align="center">
-    <!-- 表单绑定提交事件, onsubmit= 绑定一个提交检测的函数，true，false,将这个结果返回给表单，使用onsubmit接受-->
-    <!--onsubmint绑定表单，获取信息，当表单提交时候拦截加密-->
-    <form id="form" name="form" action="/loginSSH" method="post" onsubmit="return submit()">
-        <fieldset>
-            <label for="host">Host</label>
-            <input id="host" name="host" type="text" placeholder="Host" required="required" value="127.0.0.1"><br>
-            <label for="port">Port</label>
-            <input id="port" name="port" type="text" placeholder="Port" required="required" value="22"><br>
-            <label for="username">Username</label>
-            <input id="username" name="username" type="text" placeholder="Username" required="required"
-                   value="root"><br>
-            <label for="password">Password</label>
-            <input id="password" type="password"
-                   placeholder="Password" required="required" value="root" name="password"><br>
-            <!--<input type="hidden" id="password_rsa" name="password"><br>-->
-            <input type="submit" class="" value="Connect">
-        </fieldset>
-    </form>
+<div id="main" class="form">
+    <label for="host" class="form-label">Host</label>
+    <div class="input-group mb-3">
+
+        <input class="form-control" id="host" name="host" type="text" placeholder="Host" required="required"
+               value="127.0.0.1">
+    </div>
+    <label for="port" class="form-label">Port</label>
+    <div class="input-group mb-3">
+        <input class="form-control" id="port" name="port" type="text" placeholder="Port" required="required"
+               value="22"></div>
+    <label for="username" class="form-label">Username</label>
+    <div class="input-group mb-3">
+        <input class="form-control" id="username" name="username" type="text" placeholder="Username"
+               required="required"
+               value="root"></div>
+    <label for="password" class="form-label">Password</label>
+    <div class="input-group mb-3">
+        <input class="form-control" id="password" type="password"
+               placeholder="Password" required="required" value="root">
+    </div>
+    <div class="input-group mb-3">
+        <button class="btn btn-outline-secondary" onclick="submit()">Connect</button>
+    </div>
 </div>
 
 </body>

@@ -186,10 +186,13 @@ public class WebSSHServiceImpl implements WebSSHService {
         config.put("StrictHostKeyChecking", "no");
         // 获取ssh连接参数加密串
         String sshConnParamEnc = webSSHData.getSshConnParam();
+        logger.info("原始ssh连接参数加密串: {}", sshConnParamEnc);
         // 获取ssh连接参数解密串
         String sshConnParamDec = SecurityUtil.rsaDec(sshConnParamEnc);
+        logger.info("ssh连接参数解密串: {}", sshConnParamDec);
         // ssh连接参数解密串转参数Map
         Map<String, String> sshConnParamMap = HttpUtil.decodeParamMap(sshConnParamDec, CharsetUtil.CHARSET_UTF_8);
+        logger.info("ssh连接参数解密串转参数Map: {}", sshConnParamMap);
         //获取jsch的会话
         session = sshConnectInfo.getJSch().getSession(sshConnParamMap.get("username"), sshConnParamMap.get("host"), Integer.parseInt(sshConnParamMap.get("port")));
         session.setConfig(config);

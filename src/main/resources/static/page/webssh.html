@@ -3,6 +3,8 @@
 <head>
     <title>WebSSH</title>
     <link rel="stylesheet" href="../xterm/css/xterm.css"/>
+    <link rel="stylesheet" href="./../bootstrap5.0.2/css/bootstrap.min.css">
+    <script src="./../bootstrap5.0.2/js/bootstrap.min.js"></script>
     <!--    <link rel="stylesheet" href="../css/xterm.css"/>-->
     <style>
         #outerDiv {
@@ -31,6 +33,7 @@
     <div id="terminal"></div>
 </div>
 <div id="dragDiv"></div>
+<button class="btn btn-outline-secondary" onclick="jumpToSSHLoginPage()">返回SSH登录页</button>
 <script src="../js/jquery-3.4.1.min.js"></script>
 <script src="../js/global.js"></script>
 <!--<script src="../js/xterm.js" charset="utf-8"></script>-->
@@ -186,6 +189,14 @@
             }
             return i + "th";
         }
+    }
+
+    /**
+     * 跳转至SSH登录页
+     */
+    function jumpToSSHLoginPage() {
+        client.close();
+        window.location.href = "/sshapp/";
     }
 </script>
 </body>
