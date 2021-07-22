@@ -9,13 +9,16 @@ WSSHClient.prototype._generateEndpoint = function () {
     }
     // 内嵌应用可直接获取host
     var host = window.location.host;
-    var endpoint = protocol + host + '/race/webssh';
-    return endpoint;
+    var uri = global.getSysConfig('sys.ws.path');
+    if (typeof (uri) == 'undefined' || uri === null || uri === '') {
+        alert("ws 连接地址异常");
+        return;
+    }
+    return protocol + host + uri;
 };
 
 WSSHClient.prototype.connect = function (options) {
     var endpoint = this._generateEndpoint();
-
     if (window.WebSocket) {
         //如果支持websocket
         this._connection = new WebSocket(endpoint);

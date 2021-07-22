@@ -3,6 +3,7 @@ package cn.objectspace.webssh.config;
 import cn.objectspace.webssh.interceptor.WebSocketInterceptor;
 import cn.objectspace.webssh.websocket.WebSSHWebSocketHandler;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.socket.config.annotation.EnableWebSocket;
 import org.springframework.web.socket.config.annotation.WebSocketConfigurer;
@@ -19,11 +20,14 @@ public class WebSSHWebSocketConfig implements WebSocketConfigurer {
     @Autowired
     WebSSHWebSocketHandler webSSHWebSocketHandler;
 
+    @Value("${sys.ws.path}")
+    private String sysWsPath;
+
     @Override
     public void registerWebSocketHandlers(WebSocketHandlerRegistry webSocketHandlerRegistry) {
         //socket通道
         //指定处理器和路径
-        webSocketHandlerRegistry.addHandler(webSSHWebSocketHandler, "/race/webssh")
+        webSocketHandlerRegistry.addHandler(webSSHWebSocketHandler, sysWsPath)
                 .addInterceptors(new WebSocketInterceptor())
                 .setAllowedOrigins("*");
     }

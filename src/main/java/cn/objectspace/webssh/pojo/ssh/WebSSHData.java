@@ -1,4 +1,4 @@
-package cn.objectspace.webssh.pojo;
+package cn.objectspace.webssh.pojo.ssh;
 
 import lombok.AllArgsConstructor;
 import lombok.Data;

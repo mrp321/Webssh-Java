@@ -5,3 +5,7 @@ spring:
     view:
       prefix: /page/
       suffix: .html
+
+sys:
+  ws:
+    path: /sshapp/ws

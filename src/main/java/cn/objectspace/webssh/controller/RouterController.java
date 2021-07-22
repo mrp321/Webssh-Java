@@ -3,6 +3,8 @@ package cn.objectspace.webssh.controller;
 import cn.objectspace.webssh.pojo.RespBody;
 import cn.objectspace.webssh.util.SecurityUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
@@ -17,6 +19,9 @@ import java.util.Map;
 @Slf4j
 public class RouterController {
     private static final String RAW_WEB_SSH_PAGE_PARAM_URL = "host=%s&port=%s&username=%s&password=%s";
+
+    @Autowired
+    private Environment env;
 
     @RequestMapping("/")
     public String indexpage() {
@@ -46,6 +51,12 @@ public class RouterController {
     @RequestMapping("/websshpage")
     public String websshpage() {
         return "webssh";
+    }
+
+    @RequestMapping("/sysconfig")
+    @ResponseBody
+    public RespBody<String> sysconfig(String key) {
+        return new RespBody<>(0, "调用成功", env.getProperty(key));
     }
 
     private String getRequestParam(HttpServletRequest request, String param) {
