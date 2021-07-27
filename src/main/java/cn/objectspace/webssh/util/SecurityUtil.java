@@ -2,13 +2,17 @@ package cn.objectspace.webssh.util;
 
 import cn.hutool.core.codec.Base64;
 import cn.hutool.core.io.FileUtil;
+import cn.hutool.core.io.IORuntimeException;
+import cn.hutool.core.io.IoUtil;
 import cn.hutool.crypto.SecureUtil;
 import cn.hutool.crypto.asymmetric.AsymmetricAlgorithm;
 import cn.hutool.crypto.asymmetric.KeyType;
+import org.springframework.core.io.ClassPathResource;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.io.UnsupportedEncodingException;
 import java.security.KeyPair;
-import java.util.Objects;
 
 /**
  * SecurityUtil
@@ -17,12 +21,31 @@ import java.util.Objects;
  * @date 2021/6/30 8:51
  */
 public class SecurityUtil {
-    private static final String RSA_PUBLIC_KEY;
-    private static final String RSA_PRIVATE_KEY;
+    private static String RSA_PUBLIC_KEY;
+    private static String RSA_PRIVATE_KEY;
 
     static {
-        RSA_PUBLIC_KEY = FileUtil.readUtf8String(Objects.requireNonNull(SecurityUtil.class.getClassLoader().getResource("")).getPath() + "key/rsa.publicKey");
-        RSA_PRIVATE_KEY = FileUtil.readUtf8String(Objects.requireNonNull(SecurityUtil.class.getClassLoader().getResource("")).getPath() + "key/rsa.privateKey");
+        String rsaPublicKeyName = "key/rsa.publicKey";
+        String rsaPrivateKeyName = "key/rsa.privateKey";
+        RSA_PUBLIC_KEY = initRsaKey(rsaPublicKeyName);
+        RSA_PRIVATE_KEY = initRsaKey(rsaPrivateKeyName);
+    }
+
+    private static String initRsaKey(String keyName) {
+        String key = null;
+        try {
+            key = FileUtil.readUtf8String((SecurityUtil.class.getClassLoader().getResource("").getPath() + keyName));
+        } catch (IORuntimeException e) {
+            ClassPathResource classPathResource = new ClassPathResource(keyName);
+            try {
+                InputStream inputStream = classPathResource.getInputStream();
+                key = IoUtil.readUtf8(inputStream);
+            } catch (IOException ioException) {
+                ioException.printStackTrace();
+                throw new RuntimeException(ioException);
+            }
+        }
+        return key;
     }
 
     public static String rsaDec(String data) {
